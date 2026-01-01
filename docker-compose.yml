@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:15
+    container_name: booking_postgres
+    environment:
+      POSTGRES_DB: booking_db # Creates the DB defined in requirements
+      POSTGRES_USER: postgres # Default user
+      POSTGRES_PASSWORD: password # Weak password for dev env
+    ports:
+      - "5433:5432" # Maps computer port 5432 to container port
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persists data so it doesn't vanish on restart
+
+volumes:
+  postgres_data:
