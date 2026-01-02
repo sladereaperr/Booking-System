@@ -1,15 +1,23 @@
 services:
+  # Database (Keep existing setting)
   db:
     image: postgres:15
     container_name: booking_postgres
     environment:
-      POSTGRES_DB: booking_db # Creates the DB defined in requirements
-      POSTGRES_USER: postgres # Default user
-      POSTGRES_PASSWORD: password # Weak password for dev env
+      POSTGRES_DB: booking_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
-      - "5433:5432" # Maps computer port 5432 to container port
+      - "5433:5432" # Your current port mapping
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Persists data so it doesn't vanish on restart
+      - postgres_data:/var/lib/postgresql/data
+
+  # Redis (NEW ADDITION)
+  redis:
+    image: redis:alpine
+    container_name: booking_redis
+    ports:
+      - "6379:6379" # Default Redis port
 
 volumes:
   postgres_data:
