@@ -25,6 +25,9 @@ public class BookingService {
     @Autowired
     private ShowRepository showRepository;
 
+    // Inject NotificationProducer
+    @Autowired private NotificationProducer notificationProducer;
+
     // This annotation ensures the method runs as a strict Transaction.
     // Isolation.SERIALIZABLE is the highest level of safety.
     // It prevents "Dirty Reads" and "Phantom Reads," ensuring no double-booking occurs.
@@ -74,6 +77,14 @@ public class BookingService {
         booking.setStatus(BookingStatus.CONFIRMED);
 
         // 6. Save and Return
-        return bookingRepository.save(booking);
+        // At the END of bookTicket method:
+        Booking savedBooking = bookingRepository.save(booking);
+        // Send async notification (Requirement #6)
+        try {
+            notificationProducer.sendBookingConfirmation(user.getEmail(), savedBooking.getId());
+        } catch (Exception e) {
+            System.err.println("Notification failed, but booking is valid (Constraint met)");
+        }
+        return savedBooking;
     }
 }

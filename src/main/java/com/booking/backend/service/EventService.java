@@ -21,4 +21,11 @@ public class EventService {
         // If you DON'T see this, it means cache HIT.
         return eventRepository.findAll();
     }
+
+    // In src/main/java/com/booking/backend/service/EventService.java
+
+    public List<Event> searchEvents(String query) {
+        // This calls the custom repository method we added earlier
+        return eventRepository.findByTitleContainingIgnoreCaseOrGenreContainingIgnoreCase(query, query);
+    }
 }

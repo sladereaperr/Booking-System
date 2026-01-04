@@ -31,4 +31,8 @@ public class Seat {
     // Optimistic locking version (Advanced protection against double booking)
     @Version
     private Integer version;
+
+    // Inside Seat.java
+    @Column(nullable = false)
+    private String category; // e.g., "PREMIUM", "REGULAR"
 }

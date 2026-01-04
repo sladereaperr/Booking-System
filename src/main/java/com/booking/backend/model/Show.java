@@ -26,4 +26,9 @@ public class Show {
     // Helper to see seats for this show (Optional but useful)
     @OneToMany(mappedBy = "show", cascade = CascadeType.ALL)
     private List<Seat> seats;
+
+    // Inside Show.java
+    @ManyToOne
+    @JoinColumn(name = "auditorium_id")
+    private Auditorium auditorium;
 }

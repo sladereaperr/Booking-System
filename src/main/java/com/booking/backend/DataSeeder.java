@@ -12,64 +12,58 @@ import java.util.Arrays;
 @Component
 public class DataSeeder implements CommandLineRunner {
 
-    @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private UserRepository userRepository;
     @Autowired private EventRepository eventRepository;
     @Autowired private VenueRepository venueRepository;
+    @Autowired private AuditoriumRepository auditoriumRepository; // New Repo
     @Autowired private ShowRepository showRepository;
     @Autowired private SeatRepository seatRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
-        // Only seed if DB is empty
         if (userRepository.count() == 0) {
-            
-            // 1. Create User
-            User user = new User();
-            user.setName("John Doe");
-            user.setEmail("john@example.com");
-            user.setPassword(passwordEncoder.encode("password123")); // Real BCrypt hash
-            user.setRole(Role.USER);
-            userRepository.save(user);
+            System.out.println("🌱 SEEDING DATA...");
 
-            // 2. Create Event (Movie)
+            // 1. Users (Admin & User)
+            User admin = new User(null, "Admin", "admin@test.com", passwordEncoder.encode("admin123"), Role.ADMIN);
+            User user = new User(null, "User", "user@test.com", passwordEncoder.encode("user123"), Role.USER);
+            userRepository.saveAll(Arrays.asList(admin, user));
+
+            // 2. Event
             Event event = new Event();
-            event.setTitle("Avengers: Endgame");
-            event.setGenre("Action");
-            event.setDurationMinutes(180);
+            event.setTitle("Inception");
+            event.setGenre("Sci-Fi");
+            event.setDurationMinutes(148);
             eventRepository.save(event);
 
-            // 3. Create Venue
+            // 3. Venue & Auditorium
             Venue venue = new Venue();
-            venue.setName("IMAX Cinema");
-            venue.setLocation("New York");
+            venue.setName("PVR Cinemas");
+            venue.setLocation("Downtown");
             venueRepository.save(venue);
 
-            // 4. Create Show
+            Auditorium audi = new Auditorium();
+            audi.setName("IMAX Screen 1");
+            audi.setVenue(venue);
+            auditoriumRepository.save(audi); // You might need to create this Repo interface if missing
+
+            // 4. Show
             Show show = new Show();
             show.setEvent(event);
-            show.setVenue(venue);
+            show.setAuditorium(audi); // Linked to Audi, not just Venue
+            show.setVenue(venue); // Keep this if you didn't remove it, otherwise remove
             show.setStartTime(LocalDateTime.now().plusDays(1));
             showRepository.save(show);
 
-            // 5. Create Seats for the Show
-            Seat seat1 = new Seat();
-            seat1.setShow(show);
-            seat1.setRow("A");
-            seat1.setNumber(1);
-            seat1.setPrice(100.0);
-            seat1.setStatus(SeatStatus.AVAILABLE);
+            // 5. Seats (Premium & Regular)
+            Seat s1 = new Seat(); s1.setShow(show); s1.setRow("A"); s1.setNumber(1); s1.setPrice(200.0); s1.setCategory("PREMIUM"); s1.setStatus(SeatStatus.AVAILABLE);
+            Seat s2 = new Seat(); s2.setShow(show); s1.setRow("A"); s2.setNumber(2); s2.setPrice(200.0); s2.setCategory("PREMIUM"); s2.setStatus(SeatStatus.AVAILABLE);
+            Seat s3 = new Seat(); s3.setShow(show); s3.setRow("B"); s3.setNumber(1); s3.setPrice(150.0); s3.setCategory("REGULAR"); s3.setStatus(SeatStatus.AVAILABLE);
             
-            Seat seat2 = new Seat();
-            seat2.setShow(show);
-            seat2.setRow("A");
-            seat2.setNumber(2);
-            seat2.setPrice(100.0);
-            seat2.setStatus(SeatStatus.AVAILABLE);
+            seatRepository.saveAll(Arrays.asList(s1, s2, s3));
 
-            seatRepository.saveAll(Arrays.asList(seat1, seat2));
-
-            System.out.println("✅ DUMMY DATA INSERTED");
+            System.out.println("✅ DEMO DATA READY!");
         }
     }
 }
