@@ -80,7 +80,7 @@ Import the Postman collection to test the API locally.
 
 - **Docker Desktop** (Must be installed and running)
 
-###The "One-Click" Run
+### The "One-Click" Run
 
 This command builds the Java application, creates the Database, sets up Redis/Kafka, and networks them together.
 
