@@ -53,26 +53,26 @@ This project follows **Clean Architecture** principles and **SOLID** design patt
 
 ### Entity Relationship Diagram (ERD)
 
-![ER Diagram](src/main/resources/static/ER Diagram.png)
+![ER Diagram](src/main/resources/static/ER_Diagram.png)
 
 ---
 
 ### Architecture Diagram
 
-![Architecture Diagram](src/main/resources/static/Architecture Diagram.png)
+![Architecture Diagram](src/main/resources/static/Architecture_Diagram.png)
 
 ---
 
 ### Booking Flow Sequence Diagram
 
-![Booking Flow Sequence Diagram](src/main/resources/static/Booking Flow Sequence Diagram.png)
+![Booking Flow Sequence Diagram](src/main/resources/static/BookingFlowSequenceDiagram.png)
 
 ---
 
 ## 🔌 API Testing
 
 Import the Postman collection to test the API locally.
-[Download Postman Collection](./postman/booking-api.postman_collection.json)
+[Download Postman Collection](postman/BookingSystem Test.postman_collection.json)
 
 ## 🛠️ Setup & Installation
 
