@@ -72,7 +72,7 @@ This project follows **Clean Architecture** principles and **SOLID** design patt
 ## 🔌 API Testing
 
 Import the Postman collection to test the API locally.
-[Download Postman Collection](postman/BookingSystem Test.postman_collection.json)
+[Download Postman Collection](postman/BookingSystemTest.postman_collection.json)
 
 ## 🛠️ Setup & Installation
 
@@ -80,7 +80,7 @@ Import the Postman collection to test the API locally.
 
 - **Docker Desktop** (Must be installed and running)
 
-### Option 1: The "One-Click" Run (Recommended)
+###The "One-Click" Run
 
 This command builds the Java application, creates the Database, sets up Redis/Kafka, and networks them together.
 
