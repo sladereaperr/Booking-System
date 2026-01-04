@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
+@Table(name = "venue", indexes = {
+    @Index(name = "idx_venue_location", columnList = "location")
+})
 @Data
 public class Venue {
     @Id

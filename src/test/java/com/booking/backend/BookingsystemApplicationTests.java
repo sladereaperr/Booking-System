@@ -1,13 +1,13 @@
-package com.booking.backend;
+package com.booking.backend; // Verify your package
 
+import com.booking.backend.AbstractIntegrationTest; // Import your base class
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class BookingsystemApplicationTests {
+class BookingsystemApplicationTests extends AbstractIntegrationTest { // <--- THIS IS THE FIX
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+
+    }
 
 }

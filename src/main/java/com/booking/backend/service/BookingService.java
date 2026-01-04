@@ -31,7 +31,7 @@ public class BookingService {
     // This annotation ensures the method runs as a strict Transaction.
     // Isolation.SERIALIZABLE is the highest level of safety.
     // It prevents "Dirty Reads" and "Phantom Reads," ensuring no double-booking occurs.
-    @Transactional(isolation = Isolation.SERIALIZABLE) 
+    @Transactional 
     public Booking bookTicket(Long userId, Long showId, List<Long> seatIds) {
         
         // 1. Fetch User and Show (Basic Validation)
@@ -42,7 +42,7 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Show not found"));
 
         // 2. Fetch the requested Seats
-        List<Seat> seats = seatRepository.findAllById(seatIds);
+        List<Seat> seats = seatRepository.findAllByIdWithLock(seatIds);
 
         // Validation: Did we find all the seats requested?
         if (seats.size() != seatIds.size()) {

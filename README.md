@@ -1,35 +1,89 @@
-# Online Booking System - Backend Intern Project
+# 🎟️ Event Booking System (Backend)
 
-## Overview
+## 📋 Overview
 
-A Spring Boot backend for an event booking system featuring ACID compliant transactions, Redis caching, JWT security, and Docker containerization.
+A production-grade backend system for an online event and ticket booking platform (similar to BookMyShow). This project implements a robust REST API using **Spring Boot**, featuring ACID-compliant seat locking, high-performance caching, secure authentication, and event-driven notifications.
 
-## Tech Stack
+## 🚀 Tech Stack
 
-- **Language:** Java 21 (Spring Boot 3)
+- **Language:** Java 21
+- **Framework:** Spring Boot 3 (Web, Data JPA, Security)
 - **Database:** PostgreSQL 15
-- **Cache:** Redis
-- **Security:** Spring Security + JWT (BCrypt hashing)
+- **Cache:** Redis (Lettuce Client)
+- **Messaging:** Apache Kafka (Spring Kafka)
 - **Containerization:** Docker & Docker Compose
+- **Build Tool:** Maven
 
-## Features
+## ✨ Key Features
 
-1.  **User Authentication:** Secure Login/Registration with JWT.
-2.  **Event Browsing:** Cached using Redis for high performance.
-3.  **Ticket Booking:** Prevents double-booking using Serialized Transaction Isolation.
-4.  **Dockerized:** Full stack runs with a single command.
+### 1. 🛡️ Security & User Management
 
-## How to Run
+- **JWT Authentication:** Stateless security with Access and Refresh tokens.
+- **RBAC (Role-Based Access Control):** distinct `ADMIN` and `USER` roles.
+- **Password Encryption:** BCrypt hashing for secure storage.
+- **Input Validation:** Strict validation using Hibernate Validator (`@Valid`).
 
-1.  Ensure Docker Desktop is running.
-2.  Run the stack:
-    ```bash
-    docker-compose up --build
-    ```
-3.  API will be available at `http://localhost:8080`.
+### 2. 🎬 Event & Show Management
 
-## API Endpoints
+- **CRUD Operations:** Admins can create Events, Venues, Auditoriums, and Shows.
+- **Deep Search:** Users can filter events by City, Genre, Language, and Date.
+- **Dynamic Inventory:** Seats are generated per Show instance with specific pricing and categories (Premium/Regular).
 
-- `POST /api/auth/login` - Get JWT Token
-- `GET /api/events` - List Events (Cached)
-- `POST /api/bookings` - Book a ticket (Requires Auth)
+### 3. ⚡ High Performance & Scalability
+
+- **Redis Caching:** Frequently accessed data (Event listings) is cached to reduce DB load (Cache-Aside pattern).
+- **Database Indexing:** Optimized queries on `title`, `genre`, and `location`.
+
+### 4. 🔒 Reliability & Concurrency
+
+- **Double-Booking Protection:** Implemented **Pessimistic Locking** (`SELECT ... FOR UPDATE`) on Seat rows.
+- **ACID Transactions:** Ensures bookings are atomic; either all seats are booked, or none are.
+- **Integrity Constraints:** Prevents deletion of Shows/Auditoriums if bookings already exist.
+
+### 5. 📨 Notifications
+
+- **Event Driven:** Decouples booking logic from notifications using **Kafka**.
+- **Fault Tolerance:** If the notification service fails, the booking remains valid (Eventual Consistency).
+
+---
+
+## 🏗️ Architecture & Database Design
+
+This project follows **Clean Architecture** principles and **SOLID** design patterns.
+
+### Entity Relationship Diagram (ERD)
+
+![ER Diagram](src/main/resources/static/ER Diagram.png)
+
+---
+
+### Architecture Diagram
+
+![Architecture Diagram](src/main/resources/static/Architecture Diagram.png)
+
+---
+
+### Booking Flow Sequence Diagram
+
+![Booking Flow Sequence Diagram](src/main/resources/static/Booking Flow Sequence Diagram.png)
+
+---
+
+## 🔌 API Testing
+
+Import the Postman collection to test the API locally.
+[Download Postman Collection](./postman/booking-api.postman_collection.json)
+
+## 🛠️ Setup & Installation
+
+### Prerequisite
+
+- **Docker Desktop** (Must be installed and running)
+
+### Option 1: The "One-Click" Run (Recommended)
+
+This command builds the Java application, creates the Database, sets up Redis/Kafka, and networks them together.
+
+```bash
+docker-compose up --build
+```

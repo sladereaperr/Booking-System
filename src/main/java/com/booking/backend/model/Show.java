@@ -31,4 +31,6 @@ public class Show {
     @ManyToOne
     @JoinColumn(name = "auditorium_id")
     private Auditorium auditorium;
+
+    
 }

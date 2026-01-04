@@ -2,13 +2,16 @@ package com.booking.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.io.Serializable; // <--- Import this
+import java.io.Serializable;
 
 @Entity
+@Table(name = "event", indexes = {
+    @Index(name = "idx_event_title", columnList = "title"),
+    @Index(name = "idx_event_genre", columnList = "genre")
+})
 @Data
-public class Event implements Serializable { // <--- Add this interface
+public class Event implements Serializable {
     
-    // Add a version ID to prevent warnings (optional but good practice)
     private static final long serialVersionUID = 1L; 
 
     @Id
@@ -18,4 +21,8 @@ public class Event implements Serializable { // <--- Add this interface
     private String title;
     private String genre;
     private Integer durationMinutes;
+
+    // --- NEW FIELDS ---
+    private String language; // e.g., "English", "Hindi"
+    private Double rating;   // e.g., 4.5, 8.2
 }
