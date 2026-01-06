@@ -1,8 +1,11 @@
 package com.booking.backend.controller;
 
+import com.booking.backend.dto.UpdateProfileRequest;
 import com.booking.backend.model.User;
 import com.booking.backend.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,23 +15,26 @@ public class UserController {
 
     @Autowired private UserRepository userRepository;
 
-    // Get My Profile
     @GetMapping("/me")
-    public User getMyProfile(@AuthenticationPrincipal String email) {
-        // The "email" string comes directly from the JWT token via JwtFilter
-        return userRepository.findByEmail(email)
+    public ResponseEntity<User> getMyProfile(@AuthenticationPrincipal String email) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(user);
     }
 
-    // Update My Profile (Name, Phone)
     @PutMapping("/me")
-    public User updateProfile(@AuthenticationPrincipal String email, @RequestBody User updatedData) {
+    public ResponseEntity<User> updateProfile(
+            @AuthenticationPrincipal String email, 
+            @RequestBody @Valid UpdateProfileRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
-        if (updatedData.getName() != null) user.setName(updatedData.getName());
-        if (updatedData.getPhone() != null) user.setPhone(updatedData.getPhone());
+        user.setName(request.getName());
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
         
-        return userRepository.save(user);
+        User updatedUser = userRepository.save(user);
+        return ResponseEntity.ok(updatedUser);
     }
 }

@@ -1,60 +1,97 @@
 package com.booking.backend.controller;
 
+import com.booking.backend.dto.CreateEventRequest;
+import com.booking.backend.dto.UpdateEventRequest;
+import com.booking.backend.dto.CreateShowRequest;
+import com.booking.backend.dto.UpdateShowRequest;
 import com.booking.backend.model.Event;
+import com.booking.backend.model.Show;
+import com.booking.backend.model.Venue;
+import com.booking.backend.model.Auditorium;
 import com.booking.backend.repository.BookingRepository;
 import com.booking.backend.repository.EventRepository;
 import com.booking.backend.repository.ShowRepository;
+import com.booking.backend.repository.VenueRepository;
+import com.booking.backend.repository.AuditoriumRepository;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin") // CHANGED: Removed "/events" from here
+@RequestMapping("/api/admin")
 public class AdminController {
 
     @Autowired private EventRepository eventRepository;
     @Autowired private ShowRepository showRepository;
     @Autowired private BookingRepository bookingRepository;
+    @Autowired private VenueRepository venueRepository;
+    @Autowired private AuditoriumRepository auditoriumRepository;
 
     // ===========================
     // EVENT MANAGEMENT
     // ===========================
 
-    @PostMapping("/events") // ADDED: "/events" here
+    @PostMapping("/events")
     @PreAuthorize("hasRole('ADMIN')")
-    public Event createEvent(@RequestBody Event event) {
-        return eventRepository.save(event);
+    public ResponseEntity<Event> createEvent(@RequestBody @Valid CreateEventRequest request) {
+        Event event = new Event();
+        event.setTitle(request.getTitle());
+        event.setGenre(request.getGenre());
+        event.setDurationMinutes(request.getDurationMinutes());
+        event.setLanguage(request.getLanguage());
+        event.setRating(request.getRating());
+        
+        Event savedEvent = eventRepository.save(event);
+        return ResponseEntity.ok(savedEvent);
     }
 
-    @DeleteMapping("/events/{id}") // ADDED: "/events" here
+    @DeleteMapping("/events/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteEvent(@PathVariable Long id) {
+    public ResponseEntity<?> deleteEvent(@PathVariable Long id) {
         eventRepository.deleteById(id);
+        return ResponseEntity.ok("Event deleted successfully");
     }
 
-    @PutMapping("/events/{id}") // ADDED: "/events" here
+    @PutMapping("/events/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public com.booking.backend.model.Event updateEvent(@PathVariable Long id, @RequestBody com.booking.backend.model.Event updatedEvent) {
+    public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody @Valid UpdateEventRequest request) {
         return eventRepository.findById(id).map(event -> {
-            if (updatedEvent.getTitle() != null) event.setTitle(updatedEvent.getTitle());
-            if (updatedEvent.getGenre() != null) event.setGenre(updatedEvent.getGenre());
-            if (updatedEvent.getDurationMinutes() != null) event.setDurationMinutes(updatedEvent.getDurationMinutes());
-            if (updatedEvent.getLanguage() != null) event.setLanguage(updatedEvent.getLanguage());
-            if (updatedEvent.getRating() != null) event.setRating(updatedEvent.getRating());
-            return eventRepository.save(event);
-        }).orElseThrow(() -> new RuntimeException("Event not found"));
+            if (request.getTitle() != null) event.setTitle(request.getTitle());
+            if (request.getGenre() != null) event.setGenre(request.getGenre());
+            if (request.getDurationMinutes() != null) event.setDurationMinutes(request.getDurationMinutes());
+            if (request.getLanguage() != null) event.setLanguage(request.getLanguage());
+            if (request.getRating() != null) event.setRating(request.getRating());
+            Event updatedEvent = eventRepository.save(event);
+            return ResponseEntity.ok(updatedEvent);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     // ===========================
     // SHOW MANAGEMENT
     // ===========================
 
-    @PostMapping("/shows") // Remains "/shows" (Result: /api/admin/shows)
+    @PostMapping("/shows")
     @PreAuthorize("hasRole('ADMIN')")
-    public com.booking.backend.model.Show createShow(@RequestBody com.booking.backend.model.Show show) {
-        return showRepository.save(show);
+    public ResponseEntity<Show> createShow(@RequestBody @Valid CreateShowRequest request) {
+        // Fetch related entities
+        Event event = eventRepository.findById(request.getEventId())
+                .orElseThrow(() -> new RuntimeException("Event not found with ID: " + request.getEventId()));
+        Venue venue = venueRepository.findById(request.getVenueId())
+                .orElseThrow(() -> new RuntimeException("Venue not found with ID: " + request.getVenueId()));
+        Auditorium auditorium = auditoriumRepository.findById(request.getAuditoriumId())
+                .orElseThrow(() -> new RuntimeException("Auditorium not found with ID: " + request.getAuditoriumId()));
+
+        Show show = new Show();
+        show.setEvent(event);
+        show.setVenue(venue);
+        show.setAuditorium(auditorium);
+        show.setStartTime(request.getStartTime());
+
+        Show savedShow = showRepository.save(show);
+        return ResponseEntity.ok(savedShow);
     }
 
     @DeleteMapping("/shows/{id}")
@@ -69,18 +106,38 @@ public class AdminController {
 
     @PutMapping("/shows/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateShow(@PathVariable Long id, @RequestBody com.booking.backend.model.Show updatedShow) {
+    public ResponseEntity<?> updateShow(@PathVariable Long id, @RequestBody @Valid UpdateShowRequest request) {
         boolean hasBookings = bookingRepository.existsByShowId(id);
         
         return showRepository.findById(id).map(show -> {
             if (hasBookings) {
-                if (updatedShow.getAuditorium() != null && !updatedShow.getAuditorium().getId().equals(show.getAuditorium().getId())) {
+                if (request.getAuditoriumId() != null && !request.getAuditoriumId().equals(show.getAuditorium().getId())) {
                     return ResponseEntity.badRequest().body("Cannot change Auditorium (Layout) after bookings have started.");
                 }
             }
-            if (updatedShow.getStartTime() != null) show.setStartTime(updatedShow.getStartTime());
-            showRepository.save(show);
-            return ResponseEntity.ok(show);
+            
+            // Update fields if provided
+            if (request.getEventId() != null) {
+                Event event = eventRepository.findById(request.getEventId())
+                        .orElseThrow(() -> new RuntimeException("Event not found with ID: " + request.getEventId()));
+                show.setEvent(event);
+            }
+            if (request.getVenueId() != null) {
+                Venue venue = venueRepository.findById(request.getVenueId())
+                        .orElseThrow(() -> new RuntimeException("Venue not found with ID: " + request.getVenueId()));
+                show.setVenue(venue);
+            }
+            if (request.getAuditoriumId() != null) {
+                Auditorium auditorium = auditoriumRepository.findById(request.getAuditoriumId())
+                        .orElseThrow(() -> new RuntimeException("Auditorium not found with ID: " + request.getAuditoriumId()));
+                show.setAuditorium(auditorium);
+            }
+            if (request.getStartTime() != null) {
+                show.setStartTime(request.getStartTime());
+            }
+            
+            Show updatedShow = showRepository.save(show);
+            return ResponseEntity.ok(updatedShow);
         }).orElse(ResponseEntity.notFound().build());
     }
 }
